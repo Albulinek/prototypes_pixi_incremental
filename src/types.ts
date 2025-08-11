@@ -35,6 +35,9 @@ export interface GameState {
   debug: {
     enabled: boolean;
   };
+  log: string[];
+  selectedBuildingType: BuildingType | null;
+  productionBuildings: Record<string, GridPosition>;
 }
 
 type PlaceBuildingPayload = {
