@@ -38,6 +38,7 @@ export interface GameState {
   log: string[];
   selectedBuildingType: BuildingType | null;
   productionBuildings: Record<string, GridPosition>;
+  time: number;
 }
 
 type PlaceBuildingPayload = {

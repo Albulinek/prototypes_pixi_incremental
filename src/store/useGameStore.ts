@@ -9,6 +9,10 @@ export const BUILDING_COSTS = {
 } as const;
 
 const GRID_SIZE = 20;
+const DAY_DURATION = 60; // 60 ticks = 1 minute
+const NIGHT_DURATION = 60; // 60 ticks = 1 minute
+export const CYCLE_DURATION = DAY_DURATION + NIGHT_DURATION;
+
 
 const getInitialState = (): GameState => {
   const grid = Array.from({ length: GRID_SIZE }, (_, y) =>
@@ -16,7 +20,15 @@ const getInitialState = (): GameState => {
       position: { x, y },
     }))
   );
-  return { grid, resources: { stone: 500, iron: 0, gold: 0 }, debug: { enabled: true }, log: [], selectedBuildingType: BuildingType.MINER, productionBuildings: {} };
+  return { 
+    grid, 
+    resources: { stone: 500, iron: 0, gold: 0 }, 
+    debug: { enabled: true }, 
+    log: [], 
+    selectedBuildingType: BuildingType.MINER, 
+    productionBuildings: {},
+    time: 0,
+  };
 };
 
 interface GameActions {
@@ -92,12 +104,15 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
         stoneProduced += building.level;
       }
     }
-    if (stoneProduced === 0) return {};
+
+    const newTime = (state.time + 1) % CYCLE_DURATION;
+    
     return { 
       resources: { 
         ...state.resources, 
         stone: state.resources.stone + stoneProduced 
-      } 
+      },
+      time: newTime,
     };
   }),
 

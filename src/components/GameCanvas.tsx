@@ -1,10 +1,11 @@
 import { Application, extend } from '@pixi/react';
-import { Container, Graphics, Text, FederatedPointerEvent, Rectangle } from 'pixi.js';
+import { Container, Graphics, Text, FederatedPointerEvent, Rectangle, Sprite } from 'pixi.js';
 import { useGameStore } from '../store/useGameStore';
 import { BuildingType } from '../types';
+import { Miner } from './Miner';
 
 // Extend pixi-react with the components we want to use
-extend({ Container, Graphics, Text });
+extend({ Container, Graphics, Text, Sprite });
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 40;
@@ -43,18 +44,31 @@ export function GameCanvas() {
 
         {/* Buildings */}
         <pixiContainer>
-          {grid.flat().map((cell) =>
-            cell.building ? (
-              <pixiGraphics
-                key={cell.building.id}
-                draw={(g) => {
-                  const color = cell.building?.type === BuildingType.BASE ? 0x00ff00 : 0xff0000;
-                  g.fill(color);
-                  g.rect(cell.position.x * CELL_SIZE + 2, cell.position.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-                }}
-              />
-            ) : null
-          )}
+          {grid.flat().map((cell) => {
+            if (!cell.building) return null;
+
+            const buildingX = cell.position.x * CELL_SIZE;
+            const buildingY = cell.position.y * CELL_SIZE;
+
+            switch (cell.building.type) {
+              case BuildingType.MINER:
+                return <Miner key={cell.building.id} x={buildingX} y={buildingY} />;
+              case BuildingType.BASE:
+              case BuildingType.TUNNEL:
+                return (
+                  <pixiGraphics
+                    key={cell.building.id}
+                    draw={(g) => {
+                      const color = cell.building?.type === BuildingType.BASE ? 0x00ff00 : 0x808080;
+                      g.fill(color);
+                      g.rect(buildingX + 2, buildingY + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                    }}
+                  />
+                );
+              default:
+                return null;
+            }
+          })}
         </pixiContainer>
 
         {/* Debug Text */}
